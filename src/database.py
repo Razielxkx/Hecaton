@@ -1,8 +1,9 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DECIMAL
+from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+import pandas as pd
 
 # Load environment variables
 load_dotenv()
@@ -34,28 +35,28 @@ class Earnings(Base):
     """Represents the earnings table in the database."""
     __tablename__ = "earnings"
 
-    id = Column(Integer, primary_key=True)
+    index = Column(Integer, primary_key=True)
     company = Column(String(50), nullable=False)
-    eps = Column(DECIMAL, nullable=True)
+    eps = Column(String(20), nullable=True)
     eps_forecast = Column(String(20), nullable=True)
-    revenue = Column(DECIMAL, nullable=True)
+    revenue = Column(String(20), nullable=True)
     revenue_forecast = Column(String(20), nullable=True)
     market_cap = Column(String(50), nullable=True)
 
+
     @classmethod
-    def add_entry(cls, session, company, eps, eps_forecast, revenue, revenue_forecast, market_cap):
-        """Adds a new earnings entry to the database."""
-        new_entry = cls(
-            company=company,
-            eps=eps,
-            eps_forecast=eps_forecast,
-            revenue=revenue,
-            revenue_forecast=revenue_forecast,
-            market_cap=market_cap
-        )
-        session.add(new_entry)
-        session.commit()
-        return new_entry
+    def select_all(cls, session):
+        return session.query(Earnings).all()
+
+
+    @classmethod
+    def select_dataframe(cls, session):
+        query = session.query(Earnings).all()
+        columns = Earnings.__table__.columns.keys()
+        df = pd.DataFrame([{col: getattr(row, col) for col in columns} for row in query])
+        # df.drop(columns=["_sa_instance_state"], inplace=True)
+        return df
+
 
     def __repr__(self):
         """Returns a string representation of the Earnings object."""
@@ -68,11 +69,11 @@ Base.metadata.create_all(engine)
 if __name__ == "__main__":
     session = get_session()
     try:
-        # Adding an example entry
-        Earnings.add_entry(session, "KFC", 5.2, "5.5B", 120, "125B", "2.5T")
-
-        # Fetch and print all records
-        earnings_records = session.query(Earnings).all()
-        print(earnings_records)
+        Earnings.select_all(session)
+        # Earnings.add_entry(session, "KFC", 5.2, "5.5B", 120, "125B", "2.5T")
+        #
+        # # Fetch and print all records
+        # earnings_records = session.query(Earnings).all()
+        # print(earnings_records)
     finally:
         session.close()
