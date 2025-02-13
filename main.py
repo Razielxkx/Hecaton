@@ -20,10 +20,8 @@ try:
     company_name = st.text_input("Company name")
     btn_search = st.button("Search")
     if btn_search:
-        # Filter the DataFrame by company name
         result = data[data['company'] == company_name]
 
-        # Check if any result is found
         if not result.empty:
             st.dataframe(result, hide_index=True)
         else:
