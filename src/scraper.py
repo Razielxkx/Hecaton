@@ -29,4 +29,12 @@ def get_data():
     driver.quit()
 
     data_df = pd.DataFrame(rows)
-    return data_df
+
+    columns_to_check = ['eps', 'eps_forecast', 'revenue', 'revenue_forecast']
+    data_df[columns_to_check] = data_df[columns_to_check].apply(lambda x: x.str.strip().str.replace('/  ', ''))
+
+    filtered_df = data_df[~((data_df['eps'] == '--') &
+                           (data_df['eps_forecast'] == '--') &
+                           (data_df['revenue'] == '--') &
+                           (data_df['revenue_forecast'] == '--'))]
+    return filtered_df

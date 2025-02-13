@@ -35,7 +35,7 @@ class Earnings(Base):
     """Represents the earnings table in the database."""
     __tablename__ = "earnings"
 
-    index = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     company = Column(String(50), nullable=False)
     eps = Column(String(20), nullable=True)
     eps_forecast = Column(String(20), nullable=True)
